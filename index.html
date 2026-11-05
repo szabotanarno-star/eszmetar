@@ -1,0 +1,245 @@
+<title>Eszmetár</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,600;0,800;1,400&family=Alegreya+Sans:wght@400;500;700&family=Alegreya+Sans+SC:wght@500;700&display=swap&subset=latin-ext">
+<style>
+/* Layout: katalógus — fejléc + eszme-fülek + kereső; alatta egy eszme „kartotéklapja”: szókincs, megállapítások, szemelvények */
+:root{
+  --bg:#eef0f3; --surface:#ffffff; --sunk:#e4e7ec; --ink:#1a1e26; --muted:#5a6170; --line:#d3d7de;
+  --focus:#1f4e8c;
+  --c-szocializmus:#b3261e; --c-szocialdemokracia:#b8336a; --c-keresztenyszocializmus:#6b4d96;
+  --c-liberalizmus:#9a6b00; --c-nacionalizmus:#2b7a4b; --c-konzervativizmus:#1f4e8c;
+  --tint:12%; --q:#ffd84a; --q-ink:#1a1e26;
+  --f-display:"Alegreya", Georgia, "Times New Roman", serif;
+  --f-ui:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --f-sc:"Alegreya Sans SC", "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#13161b; --surface:#1b1f26; --sunk:#232832; --ink:#e7e9ee; --muted:#9ba2af; --line:#2f3540; --focus:#8fb4ee;
+  --c-szocializmus:#f08178; --c-szocialdemokracia:#ee86b0; --c-keresztenyszocializmus:#b9a0e6;
+  --c-liberalizmus:#e2b84d; --c-nacionalizmus:#6fcf97; --c-konzervativizmus:#8fb4ee;
+  --tint:22%; --q:#8a6d00; --q-ink:#fff7d6; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#13161b; --surface:#1b1f26; --sunk:#232832; --ink:#e7e9ee; --muted:#9ba2af; --line:#2f3540; --focus:#8fb4ee;
+  --c-szocializmus:#f08178; --c-szocialdemokracia:#ee86b0; --c-keresztenyszocializmus:#b9a0e6;
+  --c-liberalizmus:#e2b84d; --c-nacionalizmus:#6fcf97; --c-konzervativizmus:#8fb4ee;
+  --tint:22%; --q:#8a6d00; --q-ink:#fff7d6; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:18px}
+header.top h1{font-size:clamp(30px,5vw,42px);font-weight:800;letter-spacing:-.01em}
+header.top p{margin:0;color:var(--muted);font-size:16px}
+
+/* eszme-fülek */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tab{--c:var(--muted);display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer;font-weight:500;font-size:15px;transition:background .15s,border-color .15s}
+.tab .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.tab .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.tab:hover{border-color:var(--c)}
+.tab[aria-pressed="true"]{background:color-mix(in srgb,var(--c) var(--tint),var(--surface));border-color:var(--c);color:var(--ink);font-weight:700}
+
+/* kereső */
+.searchbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;margin-bottom:22px}
+.field{position:relative;min-width:0}
+.field input{width:100%;padding:10px 36px 10px 38px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:16px}
+.field svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2}
+.field .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:transparent;width:28px;height:28px;border-radius:6px;cursor:pointer;color:var(--muted);font-size:18px;line-height:1}
+.field .clear:hover{background:var(--sunk)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
+.seg button{border:0;background:transparent;padding:9px 12px;cursor:pointer;font-size:14px;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);font-weight:700}
+@media (max-width:760px){.searchbar{grid-template-columns:1fr}.seg{width:100%}.seg button{flex:1}}
+
+.status{color:var(--muted);font-size:14px;margin:-8px 0 18px}
+
+/* eszme kartoték */
+.ideo{--c:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:22px}
+.ideo>.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;padding:18px 22px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--c) var(--tint),var(--surface));box-shadow:inset 6px 0 0 var(--c)}
+.ideo>.head h2{font-size:clamp(24px,3.5vw,32px);font-weight:800}
+.badge{font-family:var(--f-sc);font-size:13px;letter-spacing:.06em;padding:2px 9px;border-radius:999px;border:1px solid var(--c);color:var(--ink)}
+.ideo>.head .meta{color:var(--muted);font-size:14px;margin-left:auto;font-variant-numeric:tabular-nums}
+.body{padding:20px 22px;display:grid;gap:26px}
+.label{font-family:var(--f-sc);font-weight:700;font-size:14px;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;display:flex;gap:8px;align-items:baseline}
+.label .k{font-family:var(--f-ui);font-weight:400;letter-spacing:0;font-size:13px}
+
+.vocab{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:700px){.vocab{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:3px 10px;font-size:15px;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--c)}
+.chip.concrete{background:color-mix(in srgb,var(--c) 7%,var(--surface));border-color:color-mix(in srgb,var(--c) 35%,var(--line))}
+.chip.dim{opacity:.35}
+
+ul.findings{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+ul.findings li{padding-left:18px;position:relative;max-width:72ch}
+ul.findings li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--c)}
+.pairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:14px}
+.pair{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--bg);font-size:15px}
+.pair h4{margin:0 0 6px;font-family:var(--f-display);font-size:17px}
+.pair dl{margin:0;display:grid;gap:4px}
+.pair dt{font-family:var(--f-sc);font-size:13px;letter-spacing:.06em;color:var(--muted)}
+.pair dd{margin:0 0 4px}
+
+/* szemelvények */
+.sources{display:grid;gap:14px}
+.src{border:1px solid var(--line);border-radius:8px;padding:16px 18px;background:var(--surface)}
+.src .who{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:8px}
+.src .who b{font-family:var(--f-display);font-size:18px}
+.src .who span{color:var(--muted);font-size:15px}
+.src .note{font-size:14px;color:var(--muted);font-style:italic;margin:0 0 8px}
+.src blockquote{margin:0;font-family:var(--f-display);font-size:17.5px;line-height:1.6;max-width:72ch}
+.src blockquote p{margin:0 0 .6em}
+.src blockquote p:last-child{margin:0}
+mark{color:inherit;border-radius:3px;padding:0 1px}
+mark.hl{background:color-mix(in srgb,var(--c) 18%,transparent);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--c) 70%,transparent)}
+mark.q{background:var(--q);color:var(--q-ink)}
+.turns{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.turns ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.turns li{font-family:var(--f-display);font-style:italic;font-size:16.5px;padding-left:14px;border-left:3px solid var(--c)}
+.view-turns .src blockquote{display:none}
+.view-turns .src .turns{margin-top:0;padding-top:0;border-top:0}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:28px;text-align:center;color:var(--muted)}
+.none{color:var(--muted);font-size:15px;margin:0}
+footer{color:var(--muted);font-size:14px;margin-top:30px;max-width:80ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Eszmetár</h1>
+    <p>A XIX. századi eszmerendszerek szókincse, megállapításai és forrásai az érettségi esszéhez</p>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Eszmerendszer kiválasztása"></nav>
+
+  <div class="searchbar" role="search">
+    <label class="field" for="q">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="q" type="search" autocomplete="off" placeholder="Keresés: fogalom, szerző, idézet (ékezet nélkül is)…" aria-label="Keresés">
+      <button class="clear" id="clear" type="button" aria-label="Keresés törlése" hidden>×</button>
+    </label>
+    <div class="seg" id="scope" aria-label="Keresés hatóköre">
+      <button type="button" data-v="one" aria-pressed="true">Kiválasztott eszme</button>
+      <button type="button" data-v="all" aria-pressed="false">Minden eszme</button>
+    </div>
+    <div class="seg" id="view" aria-label="Szemelvények nézete">
+      <button type="button" data-v="full" aria-pressed="true">Teljes szöveg</button>
+      <button type="button" data-v="turns" aria-pressed="false">Csak fordulatok</button>
+    </div>
+  </div>
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <main id="out"></main>
+
+  <footer>
+    A fogalmak és a megállapítások a javítási útmutatók alapján készültek. A szociáldemokrácia és a keresztényszocializmus szókincse kiegészítés, ezek az útmutatókban nem szerepelnek. A szemelvények a forrásgyűjtemény szövegét követik; a kiemelések a jellemző fordulatokat jelölik. A fogalmakra kattintva rájuk kereshetsz.
+  </footer>
+</div>
+
+<script id="data" type="application/json">{"ideologies": [{"id": "szocializmus", "name": "Szocializmus", "supplement": false, "general": ["magántulajdon", "egyén", "közösség", "forradalom", "nemzet", "osztály", "egyenlőség", "állam"], "concrete": ["közös / állami tulajdon", "társadalmi termelés", "állami tervezés", "együttműködés", "proletariátus", "proletár összefogás", "burzsoázia"], "findings": ["közösségi eszme, az egyenlőségre helyezi a hangsúlyt", "szerinte az egyenlőség teremti a szabadságot", "növelné az állam szerepét", "a nemzetállamban a burzsoázia eszközét látja, nemzeteken átívelő közösséget akar", "gyökere a felvilágosodás és a francia forradalom"]}, {"id": "szocialdemokracia", "name": "Szociáldemokrácia", "supplement": true, "general": ["osztály", "munkás", "párt", "reform", "állam", "választójog"], "concrete": ["szociáldemokrata párt", "II. Internacionálé (1889)", "revizionizmus (Bernstein)", "parlamentarizmus", "általános választójog", "szakszervezet", "sztrájk", "szociális törvények", "munkásbiztosítás", "MSZDP (1890)"], "findings": ["a szocializmusból vált ki", "forradalom helyett fokozatos reformmal, parlamenti úton akarja javítani a munkásság helyzetét", "elfogadja a polgári demokráciát", "fő követelése az általános választójog"]}, {"id": "keresztenyszocializmus", "name": "Keresztényszocializmus", "supplement": true, "general": ["vallás", "egyház", "erkölcs", "család", "közösség", "magántulajdon"], "concrete": ["Rerum novarum enciklika (XIII. Leó, 1891)", "egyházi társadalmi tanítás", "szolidaritás", "igazságos bér", "osztálybéke", "keresztény egyletek", "Prohászka Ottokár", "Katolikus Néppárt (1895)"], "findings": ["az egyház válasza a munkáskérdésre", "elutasítja az osztályharcot és a korlátlan szabad versenyt is", "védi a magántulajdont", "a társadalmi rétegek együttműködését hirdeti"]}, {"id": "liberalizmus", "name": "Liberalizmus", "supplement": false, "general": ["jog", "állam", "alkotmány", "egyén", "eszme", "szabadság", "nemzet", "nép"], "concrete": ["liberális", "szabadelvű", "jogegyenlőség", "szabadságjogok", "egyenjogúság", "tolerancia", "választójog", "alkotmányos állam", "népszuverenitás", "ellenőrzött hatalom", "szabad verseny", "vállalkozási szabadság", "reform"], "findings": ["egyénközpontú, a szabadságeszményre épül", "szerinte a szabadság teremti az egyenlőséget", "a szabadság korlátja a másik ember szabadsága (tolerancia)", "korlátozná, ellenőrizné az államot", "szabadság és felelősség", "a szabad verseny híve, háttere a kibontakozó kapitalizmus", "gyökere a felvilágosodás, terjesztője a francia forradalom és a napóleoni háborúk"]}, {"id": "nacionalizmus", "name": "Nacionalizmus", "supplement": false, "general": ["nemzet", "nép", "nyelv", "közösség", "állam", "alkotmány"], "concrete": ["nemzeti eszme", "nemzeti összetartozás-tudat", "nemzetállam", "nemzeti egység", "nemzeti függetlenség", "nemzeti jelkép (trikolór)", "nemzeti dicsőség", "nemzettárs", "egyesítési / függetlenségi mozgalom"], "findings": ["célja a társadalmi, vallási, regionális különbségeken felülemelkedő egységes nemzetállam", "az államhatalmat a nemzettől, nem az uralkodótól eredezteti", "a francia forradalom hatására és ellenhatására alakult ki", "a nemzetet „öröktől” létezőnek tartja", "termékenyítően hatott a kultúrára", "később konfliktusokat okozott a nemzetek között"]}, {"id": "konzervativizmus", "name": "Konzervativizmus", "supplement": false, "general": ["állam", "vallás", "erkölcs", "család", "közösség", "eszme"], "concrete": ["konzervatív", "hagyomány", "fokozatos reform", "Szent Szövetség"], "findings": ["az állam, a vallás, a hagyomány és a közösség meghatározó szerepét hangsúlyozza", "elutasítja az egyenjogúságot", "óvatos a változásokkal", "a forradalmi, liberális eszmék ellensúlyaként alakult ki", "a nagyhatalmi politika alapja (Szent Szövetség)"]}], "pairs": [{"ids": ["liberalizmus", "nacionalizmus"], "title": "Liberalizmus – nacionalizmus", "common": "alkotmányos állam, népszuverenitás, jogegyenlőség; a XIX. század első felében összefonódtak (pl. magyar reformkor)", "diff": "egyéni szabadság, illetve nemzeti egység a középpontban"}, {"ids": ["liberalizmus", "szocializmus"], "title": "Liberalizmus – szocializmus", "common": "mindkettő a felvilágosodásban és a francia forradalomban gyökerezik; mindkettő fontosnak tartja a szabadságot és az egyenlőséget, de mást ért rajta", "diff": "magántulajdon és verseny, illetve közös tulajdon és együttműködés; korlátozott, illetve erős állam"}, {"ids": ["nacionalizmus", "szocializmus"], "title": "Nacionalizmus – szocializmus", "common": "mindkettő közösségi eszme, gyökere a francia forradalom", "diff": "nemzeti közösség, illetve nemzeteken átívelő proletár közösség; híveik egymást nemzetük, illetve osztályuk árulójának tekinthették"}, {"ids": ["liberalizmus", "konzervativizmus"], "title": "Liberalizmus – konzervativizmus", "common": "mindkettő az ipari forradalom korának eszméje, és a pártrendszerek alapjává vált", "diff": "egyén és változás, illetve hagyomány, vallás és állam"}], "sources": [{"id": "s0", "ideology": "szocializmus", "author": "Marx és Engels", "work": "1848", "note": null, "paragraphs": ["„A burzsoázia mindinkább megszünteti a termelési eszközök, a birtok és a népesség szétforgácsoltságát. A népességet összesűrítette, a termelési eszközöket centralizálta, és a tulajdont kevés kézben koncentrálta. […] Nyíltan kijelentik, hogy céljaik csakis minden eddigi társadalmi rend erőszakos megdöntésével érhetők el. Reszkessenek az uralkodó osztályok egy kommunista forradalomtól. [Az elnyomottak] e forradalomban csak láncaikat veszíthetik. Cserébe egy egész világot nyerhetnek.”"], "highlights": ["termelési eszközöket centralizálta", "minden eddigi társadalmi rend erőszakos megdöntésével", "csak láncaikat veszíthetik", "Cserébe egy egész világot nyerhetnek"], "original": "Marx és Engels, 1848"}, {"id": "s1", "ideology": "szocializmus", "author": "Karl Marx és Friedrich Engels", "work": "", "note": null, "paragraphs": ["„A proletariátus arra használja majd fel politikai uralmát, hogy a burzsoáziától fokról fokra elragadjon minden tőkét, hogy az állam, azaz az uralkodó osztállyá szervezett proletariátus kezében centralizáljon minden termelési szerszámot és a lehető leggyorsabban fejlessze a termelőerők tömegét […]. Amikor majd a fejlődés folyamán az osztálykülönbségek eltűntek, és minden termelés a társult egyének kezében összpontosult, akkor a közhatalom elveszti politikai jellegét…”"], "highlights": ["az uralkodó osztállyá szervezett proletariátus", "centralizáljon minden termelési szerszámot", "a közhatalom elveszti politikai jellegét"], "original": "Karl Marx és Friedrich Engels"}, {"id": "s2", "ideology": "szocializmus", "author": "Kiáltvány", "work": "", "note": null, "paragraphs": ["„A nagyipar fejlődésével […] kicsúszik a burzsoázia [tőkések rétege] lába alól maga a talaj, amelyen termel és a termékeket kisajátítja. Mindenekelőtt saját sírásóját termeli. Pusztulása és a proletariátus [munkásság] győzelme egyaránt elkerülhetetlen.”"], "highlights": ["Mindenekelőtt saját sírásóját termeli", "győzelme egyaránt elkerülhetetlen"], "original": "Kiáltvány"}, {"id": "s3", "ideology": "szocializmus", "author": "Karl Marx és Friedrich Engels", "work": "Kommunista kiáltvány, 1848", "note": null, "paragraphs": ["„A tőke közösségi termék és csak a társadalom sok tagjának együttes tevékenységével, sőt végeredményben csak valamennyi tagjának együttes tevékenységével hozható mozgásba. A tőke tehát nem személyi, hanem társadalmi tulajdon.”"], "highlights": ["A tőke közösségi termék", "nem személyi, hanem társadalmi tulajdon"], "original": "Karl Marx és Friedrich Engels: Kommunista kiáltvány, 1848"}, {"id": "s4", "ideology": "szocializmus", "author": "Karl Marx és Friedrich Engels", "work": "Kommunista kiáltvány, 1848", "note": null, "paragraphs": ["„A munkásoknak nincs hazájuk. [...] Világ proletárjai, egyesüljetek!”"], "highlights": ["A munkásoknak nincs hazájuk", "Világ proletárjai, egyesüljetek!"], "original": "Karl Marx és Friedrich Engels: Kommunista kiáltvány, 1848"}, {"id": "s5", "ideology": "szocializmus", "author": "Szerző nélkül (A)", "work": "", "note": null, "paragraphs": ["„A mai rendkívül káros társadalmi rétegződés felsőbb és alsóbb osztályai helyett egyetlenegy magas színvonalon álló osztály lesz csupán.”"], "highlights": ["egyetlenegy magas színvonalon álló osztály"], "original": null}, {"id": "s6", "ideology": "szocialdemokracia", "author": "Bernstein", "work": "1899", "note": null, "paragraphs": ["„A demokrácia elérése, a demokratikus politikai és társadalmi szervezetek megalakulása jelenti a szocializmus megvalósításához nélkülözhetetlen előfeltételeket. […] A modern társadalom liberális szerveződései […] rugalmasak, és képesek a változásra, a fejlődésre. Nem megsemmisíteni kell azokat, hanem csak fejleszteni.”"], "highlights": ["A demokrácia elérése", "nélkülözhetetlen előfeltételeket", "Nem megsemmisíteni kell azokat, hanem csak fejleszteni"], "original": "Bernstein, 1899"}, {"id": "s7", "ideology": "keresztenyszocializmus", "author": "XIII. Leó", "work": "1891", "note": null, "paragraphs": ["„A termelés és szinte a teljes kereskedelem egy kisebbségnek jutott a hatalmába, úgyhogy néhány dúsgazdag ember a szegények hatalmas tömegeire rakhatta a szolgaság jármát. […] A vallás parancsai […], felettébb alkalmasak a szegények és a gazdagok megbékítésére és viszonyuk szabályozására, mivel mindkét osztályt figyelmeztetik kölcsönös kötelességeikre, különösen azokra, amelyek az igazságosság követelményei.”"], "highlights": ["a szolgaság jármát", "a szegények és a gazdagok megbékítésére", "kölcsönös kötelességeikre", "az igazságosság követelményei"], "original": "XIII. Leó, 1891"}, {"id": "s8", "ideology": "keresztenyszocializmus", "author": "A „Rerum novarum” című pápai körlevél", "work": "1891", "note": null, "paragraphs": ["„Amikor a nép helyzetének javításáról van szó, a magántulajdon sértetlen fönnmaradását kell alapul vennünk. […] Bízvást és teljes joggal bocsátkozunk éppen Mi e kérdés tárgyalásába, mivel olyan problémáról van szó, melyből a vallás és az Egyház segítsége nélkül nincs alkalmas kiút. […] Alapvető hibát követnek el a társadalmi kérdés tárgyalásában azok […], akik a két társadalmi osztályt eleve egymás ellenségének tartják, mintha a természet a gazdagokat és a szegényeket arra teremtette volna, hogy állandó harcban egymást irtsák. Ez annyira ellenkezik a józan ésszel és az igazsággal, hogy pontosan az ellenkezője igaz. […] Hiszen teljes mértékben egymásra vannak utalva: sem a tőke munka nélkül, sem a munka tőke nélkül nem lehet meg. […]", "A munkásokra, a szegényekre az alábbi kötelességek vonatkoznak: a munkát, amelyet szabadon és méltányos szerződéssel vállaltak, végezzék tökéletesen és hűen. […] A munkaadók legfőbb kötelességei közé tartozik, hogy munkásaikat ne tekintsék rabszolgának; tisztelni tartoznak személyiségük méltóságát.”"], "highlights": ["a magántulajdon sértetlen fönnmaradását", "a vallás és az Egyház segítsége nélkül nincs alkalmas kiút", "a két társadalmi osztályt eleve egymás ellenségének tartják", "sem a tőke munka nélkül, sem a munka tőke nélkül nem lehet meg", "tisztelni tartoznak személyiségük méltóságát"], "original": "A „Rerum novarum” című pápai körlevél, 1891"}, {"id": "s9", "ideology": "liberalizmus", "author": "John Stuart Mill", "work": "A szabadságról, 1859", "note": null, "paragraphs": ["„A szabadság egyetlen fajtája, mely megérdemli ezt a nevet, ha saját javunkra a magunk módján törekedhetünk mindaddig, míg nem próbálunk másokat ugyanebben megakadályozni, vagy gátolni ezt célzó erőfeszítéseiket. Saját testi, lelki vagy szellemi egészségének mindenki maga a legjobb őrzője. Az emberiség többet nyer, ha eltűri, hogy mindenki úgy él, ahogy neki tetszik, mintha arra kényszerítik egymást, hogy úgy éljenek, ahogy a többieknek tetszik.”"], "highlights": ["a magunk módján törekedhetünk", "míg nem próbálunk másokat ugyanebben megakadályozni", "mindenki maga a legjobb őrzője"], "original": "John Stuart Mill: A szabadságról, 1859"}, {"id": "s10", "ideology": "liberalizmus", "author": "John Stuart Mill", "work": "", "note": null, "paragraphs": ["„Az egyén szabadságának tehát korlátozottnak kell lennie: nem lehet más emberek kárára. De ha másokat saját ügyeiben nem zavar valaki, egyszerűen csak saját meggyőződése és megítélése szerint cselekszik a rá tartozó dolgokban, ugyanazok az okok, amelyek indokolták, hogy a vélekedésnek szabadnak kell lennie, azt is indokolják, hogy az egyénnek megengedjék, hogy saját számlájára nézeteit zavartalanul átültesse a gyakorlatba.”"], "highlights": ["nem lehet más emberek kárára", "a vélekedésnek szabadnak kell lennie"], "original": "John Stuart Mill"}, {"id": "s11", "ideology": "liberalizmus", "author": "Szerző nélkül (D)", "work": "", "note": null, "paragraphs": ["„Az egyetlen cél, amelynek érdekében jogosan lehet civilizált közösség bármely tagjával szemben – akarat ellenére – erőszakot alkalmazni: mások sérelmének megakadályozása. Az ő saját java nem elégséges indok erre.”"], "highlights": ["mások sérelmének megakadályozása", "Az ő saját java nem elégséges indok erre"], "original": null}, {"id": "s12", "ideology": "liberalizmus", "author": "J. S. Mill", "work": "XIX. századi gondolkodó írásaiból", "note": "Az utolsó két bekezdés külön részletként is szerepel a forrásgyűjteményben (J. S. Mill; J. S. Mill, 1862).", "paragraphs": ["„Hasznos az, ha eltérő nézetek léteznek, s az is hasznos, ha vannak eltérő élettapasztalatok, ha szabad teret kapnak a legkülönbözőbb jellemek, míg másoknak nem ártanak, ha mindenki a gyakorlatban próbálja ki a különböző életformák értékét. […] Ott, ahol nem az emberek saját jelleme, hanem a hagyományok vagy más emberek szokásai szabályozzák a viselkedést, hiányzik az emberi boldogság egyik lényeges összetevője, mely egyben a társadalmi haladás legfontosabb összetevője is. […]", "Apám bizalma az észnek az emberekre gyakorolt befolyásában oly nagy volt, hogy úgy érezte: minden meg lenne nyerve, ha az egész lakosság olvasni tudna, ha mindenfajta véleményt megismerhetne szóban vagy írásban, és ha szavazással választhatná meg a törvényhozó testületet, s ezáltal érvényesíthetné kialakított véleményét. […]", "A kormány hatalmának minden szükségtelen növekedése nagyon káros. Minden funkció, melyet hozzáadnak a kormány által már gyakoroltakhoz, csak növeli az emberek reményeire és aggodalmaira tett befolyását, egyre inkább a maga vagy az ő tisztére pályázó pártok tányérnyalójává teszi a közösség tevékenyebb és becsvágyóbb részét. […]", "A férj szinte zsarnoki hatalmáról felesége felett nem kell itt hosszasan beszélnünk, mivel a szörnyűség teljes megszüntetéséhez semmi többre nem lenne szükség, mint hogy a feleség ugyanazokkal a jogokkal rendelkezzék, mint bárki más.”"], "highlights": ["Hasznos az, ha eltérő nézetek léteznek", "a hagyományok vagy más emberek szokásai", "szavazással választhatná meg a törvényhozó testületet", "A kormány hatalmának minden szükségtelen növekedése nagyon káros", "ugyanazokkal a jogokkal rendelkezzék, mint bárki más"], "original": "J. S. Mill, XIX. századi gondolkodó írásaiból"}, {"id": "s13", "ideology": "liberalizmus", "author": "Benjamin Constant", "work": "Politikai értekezés", "note": "A forrásgyűjteményben szerző nélkül szerepel; a szerző megnevezése besorolás.", "paragraphs": ["„Negyven éven át ugyanazt az elvet védtem: a szabadságot mindenben, a vallásban, a filozófiában, az iparban, a politikában, s a szabadságon pedig az individualitás [egyéniség] győzelmét értem a despotizmus által uralkodni akaró tekintély felett éppúgy, mint a kisebbség leigázásának jogát követelő tömegek felett.”"], "highlights": ["a szabadságot mindenben", "az individualitás [egyéniség] győzelmét", "a despotizmus által uralkodni akaró tekintély felett", "a kisebbség leigázásának jogát követelő tömegek felett"], "original": "Politikai értekezés"}, {"id": "s14", "ideology": "liberalizmus", "author": "Rotteck és Welcker", "work": "Staatslexikon, „Demokrácia” szócikk, 1830", "note": null, "paragraphs": ["„Mi pusztán az államközösségben egyesített, észjogilag teljes jogú tagokból álló nép szuverenitásának eszméjén alapuló irányzatot értjük alatta, amelynek célja mind a közösséget illető politikai jogokból, mind az összesség által szavatolt általános polgári és emberi jogokból való egyenlő részesedés. Ennek eleget tesz, ha a jogot megadják minden polgárnak egyenlő mértékben, tehát amennyiben a kiváltságokkal szemben az azonos jog alapelvét juttatják uralomra.”"], "highlights": ["nép szuverenitásának eszméjén", "polgári és emberi jogokból való egyenlő részesedés", "a kiváltságokkal szemben az azonos jog alapelvét"], "original": "A „Demokrácia” című szócikk a Staatslexikonból, a liberális Rotteck és Welker írása; 1830"}, {"id": "s15", "ideology": "liberalizmus", "author": "Adam Smith", "work": "A nemzetek gazdagsága, 1776", "note": null, "paragraphs": ["„Hogy melyik a hazai tevékenységnek az a fajtája, melyben tőkéjét elhelyezheti és melynek eredménye lesz valószínűleg a legnagyobb értékű, ezt mindenki saját helyzetét ismerve sokkal jobban megítélheti, mint bármely államférfi vagy törvényhozó helyette tehetné.”"], "highlights": ["mindenki saját helyzetét ismerve sokkal jobban megítélheti, mint bármely államférfi vagy törvényhozó"], "original": "Adam Smith: A nemzetek gazdagsága, 1776"}, {"id": "s16", "ideology": "liberalizmus", "author": "Adam Smith", "work": "1776", "note": null, "paragraphs": ["„Az egyénnek a saját helyzete javítására irányuló törekvése, ha ez szabadság és biztonság mellett történik, olyan hatalmas erő, amely egyedül, minden segítség nélkül képes nemcsak arra, hogy előbbre vigye a társadalmat a jólét és a boldogulás útján, hanem arra is, hogy legyőzzön száz elébe tornyosuló akadályt, amellyel az emberi törvény ostobasága oly gyakran veszélyezteti igyekezetét.”"], "highlights": ["ha ez szabadság és biztonság mellett történik", "olyan hatalmas erő", "az emberi törvény ostobasága"], "original": "A. Smith; 1776"}, {"id": "s17", "ideology": "liberalizmus", "author": "Széchenyi István", "work": "A Kelet népe, 1841", "note": "Mérsékelt reformliberalizmus: szabadságjog, de a forradalmi hevület ellen.", "paragraphs": ["„Ahelyett végre, hogy diadalosan kiviláglanék, mennyire hirtelenkedett a kormány […]; ahelyett, hogy megmutatná a magyar […], miképp a sajtószabadsággal, az emberiség ezen lehető legnagyobb kincsével […] bölcsen tudna élni, […] – ahelyett mi világlik ki? Hogy a kormány féltékenysége [félelme] nem volt tán oly igen ok nélküli, midőn bizonyos felhevülési árnak [értsd: forradalmi gondolatoknak] gátat vetni óhajtott.”"], "highlights": ["a sajtószabadsággal, az emberiség ezen lehető legnagyobb kincsével", "bölcsen tudna élni", "bizonyos felhevülési árnak"], "original": "Széchenyi István: A Kelet népe, 1841"}, {"id": "s18", "ideology": "nacionalizmus", "author": "Moritz Arndt", "work": "Napóleon-ellenes kiáltvány, 1813", "note": null, "paragraphs": ["„Talpra, németek! Talpra, német nép! Te egykor oly tiszteletre méltó, bátor és nagyra becsült nép! Talpra! Hasson át benneteket a nagy s olyan régen elfeledett testvériség! Érezzétek az azonos vér szent és eltéphetetlen kötelékeit, az azonos nyelvét és életmódét, hiszen éppen ezeket akarták ronggyá tépni az idegenek! Ne legyen többé katolikus és protestáns, ne legyen többé porosz és osztrák, szász és bajor, ne legyen többé gondolatbéli és akaratbéli ellentét köztetek – legyetek végre egységesek!”"], "highlights": ["Talpra, németek!", "az azonos vér szent és eltéphetetlen kötelékeit", "az azonos nyelvét és életmódét", "ne legyen többé porosz és osztrák", "legyetek végre egységesek!"], "original": "Moritz Arndt Napóleon-ellenes kiáltványa; 1813"}, {"id": "s19", "ideology": "nacionalizmus", "author": "Szerző nélkül (E)", "work": "", "note": "Arndt kiáltványának eltérő fordítása.", "paragraphs": ["„Ne legyen többé katolikus és protestáns, ne legyen többé porosz és osztrák, szász és bajor, ne legyen többé gondolatbeli és akaratbeli ellentét köztetek – németek, legyetek végre egységesek, akarjatok végre egyet!”"], "highlights": ["németek, legyetek végre egységesek, akarjatok végre egyet!"], "original": null}, {"id": "s20", "ideology": "nacionalizmus", "author": "Giuseppe Mazzini", "work": "Az Ifjú Itália elvei, 1832", "note": null, "paragraphs": ["„Olaszok testvérisége, akik szövetkezésben egyesülten gondolataikat és tevékenységüket a nagy célnak szenteleik, hogy felélesszék Itáliát, mint szabad és egyenlő emberek nemzetét, amely egységes, független és államilag önálló.”"], "highlights": ["szabad és egyenlő emberek nemzetét", "egységes, független és államilag önálló"], "original": "Mazzini: Az Ifjú Itália elvei, 1832"}, {"id": "s21", "ideology": "nacionalizmus", "author": "Giuseppe Mazzini", "work": "Az Ifjú Itália elvei, 1834", "note": "Ugyanannak a szövegnek másik fordítása, eltérő évszámmal.", "paragraphs": ["„Az Ifjú Itália azoknak az olaszoknak a testvérisége, akik [...] tevékenységüket a nagy célnak szentelik, hogy felélesszék Itáliát, mint szabad és egyenlő emberek nemzetét, amely egységes, független és államilag önálló. A nemzet az egyetlen szövetségben testvérré vált és egyetlen közös törvény alatt élő olaszok egyetemessége.”"], "highlights": ["egyetlen szövetségben testvérré vált", "egyetlen közös törvény alatt élő olaszok egyetemessége"], "original": "Giuseppe Mazzini: Az Ifjú Itália elvei, 1834"}, {"id": "s22", "ideology": "nacionalizmus", "author": "Giuseppe Mazzini", "work": "Itália, Ausztria és a pápa, 1845", "note": null, "paragraphs": ["„Huszonegy-huszonkétmilliós nép vagyunk, melyet emberemlékezet óta ugyanazzal a névvel illetnek, az olasz névvel, melyet az Isten által valaha húzott legpontosabb természetes határok, a magas hegyek és a tenger, zárnak körül, mely ugyanazon nyelvet beszéli, […] és ugyanazon hitet vallja, melynek ugyanazok a szokásai és hagyományai, […] amely büszke Európa szerte ismert politikai, tudományos és művészeti múltjára, és amely kétszer is az egység szavával és kötelékével ajándékozta meg az emberiséget, először a császárok Rómájáéval, később pedig, midőn még nem árulta el hivatását, a pápákéval, […] mely bővelkedik az anyagi jólét forrásaiban, melyeket ha testvériesen és szabadon felhasználunk, minket is boldogíthatnak és a testvérnemzetek előtt is a legfényesebb jövőt nyithatják meg.”"], "highlights": ["emberemlékezet óta ugyanazzal a névvel", "legpontosabb természetes határok", "ugyanazon nyelvet beszéli", "ugyanazon hitet vallja", "büszke Európa szerte ismert politikai, tudományos és művészeti múltjára"], "original": "Giuseppe Mazzini: Itália, Ausztria és a pápa, 1845"}, {"id": "s23", "ideology": "nacionalizmus", "author": "Johann Gottfried Herder", "work": "", "note": null, "paragraphs": ["„A népek nem egyik napról a másikra érlelik meg kultúrájuk legjavát: semmiféle idegen nyelv ezt ki nem kényszerítheti. A nemzeti talajon növekszik a kultúra legjobban, sőt mondhatnám, csak a nemzet öröklött és tovább öröklődő nyelvében tud fejlődni.”"], "highlights": ["A nemzeti talajon növekszik a kultúra legjobban", "öröklött és tovább öröklődő nyelvében"], "original": "Johann Gottfried Herder"}, {"id": "s24", "ideology": "nacionalizmus", "author": "Kiáltvány", "work": "", "note": null, "paragraphs": ["„Eljön a nap […], amikor az Alpok, az Északi-tenger, a Rajna, a Duna és az Elba németjei testvérként ölelik át egymást, amikor a vámhatárok és a sorompók, az elkülönülés, az akadályok és a csüggedtség valamennyi felségjele eltűnik.”"], "highlights": ["testvérként ölelik át egymást", "a vámhatárok és a sorompók"], "original": "Kiáltvány"}, {"id": "s25", "ideology": "nacionalizmus", "author": "Otto von Bismarck", "work": "beszédeiből, 1888", "note": "A forrásgyűjteményben az 1881-es részlettel együtt szerepel.", "paragraphs": ["Aki mégis megszegi [a békét], az meggyőződhet róla, hogy az a harcias hazaszeretet, ami 1813-ban az akkoriban kicsi, gyenge és erejétől megfosztott Poroszország egész lakosságát a zászlók alá szólította, ma már az egész német nemzet kincse.”"], "highlights": ["harcias hazaszeretet", "az egész német nemzet kincse"], "original": "Bismarck beszédeiből, 1881 és 1888"}, {"id": "s26", "ideology": "konzervativizmus", "author": "Edmund Burke", "work": "1790", "note": null, "paragraphs": ["„Az újítás megváltoztatja a dolgok lényegét, s az alapvető jót éppúgy eltünteti belőlük, mint a járulékos rosszat. A reform nem a lényeg átalakítása, […] hanem a szóban forgó sérelem orvoslása. […] Újítani nem ugyanaz, mint reformálni.[…] A gyermeknek, hogy az emberiség része legyen, hogy saját identitása [azonosságtudata] legyen, el kell sajátítania a kultúrát, […] az anyanyelvet, a közös tapasztalatokat, mert az különböztet meg gyökeresen egy bizonyos népet a többi néptől. Az emberi természet a viselkedést a szokásokon keresztül tartja fenn.”"], "highlights": ["Újítani nem ugyanaz, mint reformálni", "a szóban forgó sérelem orvoslása", "Az emberi természet a viselkedést a szokásokon keresztül tartja fenn"], "original": "E. Burke; 1790"}, {"id": "s27", "ideology": "konzervativizmus", "author": "Edmund Burke", "work": "", "note": null, "paragraphs": ["„Egy új kormány alakításának puszta gondolata elegendő ahhoz, hogy undort és félelmet váltson ki belőlünk. A Forradalom korában (az író az angol forradalomról beszél) azt akartuk, s ma is az a célunk, hogy mindazt, amink van, őseink örökségeként birtokoljuk. Nagy gondot fordítottunk arra, hogy ne oltsunk be örökségünk törzsébe semmilyen sarjat, amely nem felel meg az eredeti növény természetének…”"], "highlights": ["undort és félelmet", "őseink örökségeként birtokoljuk", "az eredeti növény természetének"], "original": "Edmund Burke"}, {"id": "s28", "ideology": "konzervativizmus", "author": "Politikai értekezés", "work": "", "note": "Szövege alapján valószínűleg Burke.", "paragraphs": ["„Ősapáinktól származó örökségünkként birtokoljuk mindenünket, amink van. […] Valamennyi megújítás, amit ez ideig végrehajtottunk, a múlt iránti tisztelet elvén alapult s remélem, sőt meggyőződésem, hogy mindazokat, amelyek a jövőben bekövetkezhetnek, […] az autoritásra [tekintélyre] és a történelmi példára fogják alapozni.”"], "highlights": ["Ősapáinktól származó örökségünkként", "a múlt iránti tisztelet elvén", "az autoritásra [tekintélyre] és a történelmi példára"], "original": "Politikai értekezés"}, {"id": "s29", "ideology": "konzervativizmus", "author": "Szerző nélkül (B)", "work": "", "note": null, "paragraphs": ["„Ha nélkülözhetetlen az óvatosság ott, ahol élettelen anyaggal van dolgunk, sokkal nélkülözhetetlenebbé válik, amikor rombolásunk és alkotásunk tárgyai érző lények, akiket nyomorba dönthetünk gyors és meggondolatlan döntésünkkel.”"], "highlights": ["nélkülözhetetlen az óvatosság", "gyors és meggondolatlan döntésünkkel"], "original": null}, {"id": "s30", "ideology": "konzervativizmus", "author": "Joseph-Marie de Maistre", "work": "Gondolatok Franciaországról, 1796", "note": null, "paragraphs": ["„Egyetlen nemzet sem adhat magának szabadságot, ha azzal nem rendelkezik már eleve. Mikor kezd magára eszmélni, a törvények már készen állnak. […] Ha egyes emberek áthágják e határt [törvényeket] merész reformjaikkal, a nemzet azt is elveszíti, ami eddig részéül jutott, s mégsem éri el, amit kíván. Ebből következik, hogy csak igen ritkán szabad újítani, s mindig mértékkel és igen óvatosan. […] A szabadság bizonyos értelemben mindig a királyok adománya volt, hiszen minden nemzetet a királyok alkottak. […] Emberek ilyen-olyan gyülekezete nem alkothat nemzetet. […] Igen nagy hiba, ha azt képzeljük, hogy a nép veszítene valamit a monarchia visszaállításával: a nép ugyanis pusztán elvben nyert az általános felfordulással.”"], "highlights": ["csak igen ritkán szabad újítani, s mindig mértékkel és igen óvatosan", "A szabadság bizonyos értelemben mindig a királyok adománya volt", "Emberek ilyen-olyan gyülekezete nem alkothat nemzetet", "a monarchia visszaállításával"], "original": "Joseph-Marie de Maistre: Gondolatok Franciaországról, 1796"}, {"id": "s31", "ideology": "konzervativizmus", "author": "Joseph-Marie de Maistre", "work": "1810", "note": null, "paragraphs": ["„Mindöröktől a papok, a nemesség, az államhivatalnokok feladata, hogy a konzervatív igazság őrzői és letéteményesei legyenek, hogy megtanítsák a népnek, mi a jó és mi a rossz, mi az igaz és mi a hamis az erkölcsi és szellemi világrendben.”"], "highlights": ["a papok, a nemesség, az államhivatalnokok", "a konzervatív igazság őrzői és letéteményesei"], "original": "J. De Maistre; 1810"}, {"id": "s32", "ideology": "konzervativizmus", "author": "Szerző nélkül (C)", "work": "", "note": "Abszolutista érvelés: a konzervativizmusnál régebbi, de vele rokon tekintélyelv.", "paragraphs": ["„[…] A jól kormányzott országban a szuverén hatalmat egyetlen embernek kell gyakorolnia, a rendek nem részesülhetnek a hatalomból, és nem parancsolhatnak az uralkodónak.”"], "highlights": ["a szuverén hatalmat egyetlen embernek kell gyakorolnia", "a rendek nem részesülhetnek a hatalomból"], "original": null}, {"id": "s33", "ideology": "konzervativizmus", "author": "Otto von Bismarck", "work": "beszédeiből, 1881", "note": "A forrásgyűjteményben az 1888-as részlettel együtt szerepel.", "paragraphs": ["„Nem vagyok sem reakciós, sem abszolutista, […] de az írott alkotmányainkhoz tartom magamat, […] ezek nekem elegendőek, de ezekben semmi nincs afféle parlamentarizmusról, amiről az előttem szóló beszélt. […]"], "highlights": ["sem reakciós, sem abszolutista", "az írott alkotmányainkhoz tartom magamat", "semmi nincs afféle parlamentarizmusról"], "original": null}, {"id": "s34", "ideology": "konzervativizmus", "author": "R. v. Mohl", "work": "1868", "note": "Mohl maga liberális jogtudós volt; a részlet Mill nőjogi érvelésének ellenpontja.", "paragraphs": ["„Egyedül a férfi képes a közjavát szolgálni, amikor megfékezi a tüzet és az áradást, megküzd a vadállatokkal és az emberekkel, utakat és árkokat épít, háborút visel. […] Ezért nem igaz, hogy a nők egyenlő jogokra tarthatnak igényt a közügyekben.”"], "highlights": ["Egyedül a férfi képes a közjavát szolgálni", "nem igaz, hogy a nők egyenlő jogokra tarthatnak igényt"], "original": "R. V. Mohl; 1868"}]}</script>
+<script>
+(function(){
+  var D = JSON.parse(document.getElementById('data').textContent);
+  var byId = {}; D.ideologies.forEach(function(i){ byId[i.id]=i; i.sources = D.sources.filter(function(s){return s.ideology===i.id}); });
+
+  var S = { ideo: D.ideologies[0].id, q:'', scope:'one', view:'full' };
+  try { var v = localStorage.getItem('eszmetar-view'); if (v==='full'||v==='turns') S.view=v; } catch(e){}
+  var h = (location.hash||'').slice(1); if (byId[h]) S.ideo = h;
+
+  // ékezetfüggetlen, hossztartó normalizálás
+  function fold(s){ var o=''; for (var i=0;i<s.length;i++){ var c=s[i].toLowerCase(); var b=c.normalize('NFD')[0]; o += b; } return o; }
+  function esc(s){ return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
+  function ranges(text, needle){ var r=[]; if(!needle) return r; var f=fold(text), n=fold(needle), i=0;
+    while((i=f.indexOf(n,i))>-1){ r.push([i,i+n.length]); i+=n.length; } return r; }
+  function has(text, q){ return !q || fold(text).indexOf(fold(q))>-1; }
+  function paint(text, hlList, q){
+    var L=text.length, a=new Uint8Array(L);
+    (hlList||[]).forEach(function(h){ ranges(text,h).forEach(function(r){ for(var i=r[0];i<r[1];i++) a[i]|=1; }); });
+    ranges(text,q).forEach(function(r){ for(var i=r[0];i<r[1];i++) a[i]|=2; });
+    var out='', i=0;
+    while(i<L){ var f=a[i], j=i; while(j<L && a[j]===f) j++;
+      var seg=esc(text.slice(i,j));
+      if(f&2) seg='<mark class="q">'+seg+'</mark>';
+      if(f&1) seg='<mark class="hl">'+seg+'</mark>';
+      out+=seg; i=j; }
+    return out;
+  }
+
+  var tabs=document.getElementById('tabs'), out=document.getElementById('out'), qi=document.getElementById('q'),
+      clr=document.getElementById('clear'), status=document.getElementById('status');
+
+  D.ideologies.forEach(function(i){
+    var b=document.createElement('button'); b.type='button'; b.className='tab'; b.dataset.id=i.id;
+    b.style.setProperty('--c','var(--c-'+i.id+')');
+    b.innerHTML='<span class="dot"></span>'+esc(i.name)+' <span class="n">'+i.sources.length+'</span>';
+    b.addEventListener('click',function(){ S.ideo=i.id; if(S.scope==='all') setSeg('scope','one'); render(); setHash(i.id); });
+    tabs.appendChild(b);
+  });
+
+  function setHash(id){
+    try { history.replaceState(null,'','#'+id); return; } catch(e){}
+    try { if (location.hash !== '#'+id) location.hash = id; } catch(e){}
+  }
+  function setSeg(id,v){ S[id]=v; document.querySelectorAll('#'+id+' button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===v?'true':'false'); }); }
+  document.querySelectorAll('#scope button').forEach(function(b){ b.addEventListener('click',function(){ setSeg('scope',b.dataset.v); render(); }); });
+  document.querySelectorAll('#view button').forEach(function(b){ b.addEventListener('click',function(){ setSeg('view',b.dataset.v); try{localStorage.setItem('eszmetar-view',S.view)}catch(e){} render(); }); });
+  qi.addEventListener('input',function(){ S.q=qi.value.trim(); render(); });
+  clr.addEventListener('click',function(){ qi.value=''; S.q=''; render(); qi.focus(); });
+  window.addEventListener('hashchange',function(){ var h=location.hash.slice(1); if(byId[h]){ S.ideo=h; render(); } });
+  out.addEventListener('click',function(e){ var c=e.target.closest('.chip'); if(!c) return; qi.value=c.dataset.term; S.q=c.dataset.term; render(); qi.scrollIntoView({block:'nearest'}); });
+
+  function srcMatches(s,q){ return has(s.author+' '+s.work+' '+(s.note||'')+' '+s.paragraphs.join(' ')+' '+s.highlights.join(' '), q); }
+
+  function block(i, q, filtering){
+    var gen=i.general.filter(function(t){return has(t,q)}), con=i.concrete.filter(function(t){return has(t,q)}),
+        fin=i.findings.filter(function(t){return has(t,q)}),
+        pairs=D.pairs.filter(function(p){ return p.ids.indexOf(i.id)>-1 && has(p.title+' '+p.common+' '+p.diff,q); }),
+        src=i.sources.filter(function(s){return srcMatches(s,q)});
+    var total=gen.length+con.length+fin.length+pairs.length+src.length;
+    if(filtering && total===0) return {html:'',n:0};
+    function chips(list, cls){ return list.length ? '<div class="chips">'+list.map(function(t){ return '<button type="button" class="chip '+cls+'" data-term="'+esc(t)+'">'+paint(t,null,q)+'</button>'; }).join('')+'</div>' : '<p class="none">Nincs találat.</p>'; }
+    var html='<section class="ideo" style="--c:var(--c-'+i.id+')" aria-labelledby="h-'+i.id+'">'+
+      '<div class="head"><h2 id="h-'+i.id+'">'+esc(i.name)+'</h2>'+(i.supplement?'<span class="badge">kiegészítés</span>':'')+
+      '<span class="meta">'+i.general.length+' általános · '+i.concrete.length+' konkrét fogalom · '+i.sources.length+' szemelvény</span></div>'+
+      '<div class="body">'+
+      ((!q||gen.length||con.length)?'<div class="vocab">'+((!q||gen.length)?'<div><h3 class="label">Általános fogalmak <span class="k">'+gen.length+'</span></h3>'+chips(gen,'')+'</div>':'')+
+      ((!q||con.length)?'<div><h3 class="label">Konkrét történelmi fogalmak <span class="k">'+con.length+'</span></h3>'+chips(con,'concrete')+'</div>':'')+'</div>':'')+
+      ((!q||fin.length||pairs.length)?'<div><h3 class="label">Megállapítások az esszéhez <span class="k">'+fin.length+'</span></h3>'+
+        (fin.length?'<ul class="findings">'+fin.map(function(t){return '<li>'+paint(t,null,q)+'</li>'}).join('')+'</ul>':'<p class="none">Nincs találat.</p>')+
+        (pairs.length?'<div class="pairs">'+pairs.map(function(p){ return '<div class="pair"><h4>'+esc(p.title)+'</h4><dl><dt>közös pont</dt><dd>'+paint(p.common,null,q)+'</dd><dt>eltérés</dt><dd>'+paint(p.diff,null,q)+'</dd></dl></div>'; }).join('')+'</div>':'')+
+      '</div>':'')+
+      ((!q||src.length)?'<div><h3 class="label">Forrásszemelvények <span class="k">'+src.length+(q?' / '+i.sources.length:'')+'</span></h3>'+
+        (src.length?'<div class="sources">'+src.map(function(s){
+          return '<article class="src"><div class="who"><b>'+paint(s.author,null,q)+'</b>'+(s.work?'<span>'+paint(s.work,null,q)+'</span>':'')+'</div>'+
+            (s.note?'<p class="note">'+paint(s.note,null,q)+'</p>':'')+
+            '<blockquote>'+s.paragraphs.map(function(p){return '<p>'+paint(p,s.highlights,q)+'</p>'}).join('')+'</blockquote>'+
+            '<div class="turns"><h4 class="label">Jellemző fordulatok</h4><ol>'+s.highlights.map(function(t){return '<li>„'+paint(t,null,q)+'”</li>'}).join('')+'</ol></div></article>';
+        }).join('')+'</div>':'<p class="none">Nincs találat.</p>')+
+      '</div>':'')+'</div></section>';
+    return {html:html,n:total};
+  }
+
+  function render(){
+    clr.hidden = !S.q;
+    tabs.querySelectorAll('.tab').forEach(function(b){ b.setAttribute('aria-pressed', (S.scope==='one'&&b.dataset.id===S.ideo)?'true':'false'); });
+    out.className = S.view==='turns' ? 'view-turns' : '';
+    var list = S.scope==='all' ? D.ideologies : [byId[S.ideo]];
+    var html='', n=0, hit=0;
+    list.forEach(function(i){ var r=block(i,S.q,S.scope==='all'||!!S.q); html+=r.html; n+=r.n; if(r.n) hit++; });
+    if(S.q && S.scope==='one' && n===0) html='';
+    if(!html) html='<div class="empty">Nincs találat erre: „'+esc(S.q)+'”. Próbáld a <b>Minden eszme</b> hatókört, vagy egy rövidebb szótöredéket.</div>';
+    out.innerHTML=html;
+    status.textContent = S.q ? n+' találat'+(S.scope==='all'?' '+hit+' eszmében':'')+' erre: „'+S.q+'”' : (S.scope==='all'?'Minden eszmerendszer':'');
+  }
+  render();
+})();
+</script>
